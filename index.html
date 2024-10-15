@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>WASM Go App</title>
+	<script>
+		async function loadWasm() {
+			const go = new Go();
+			const wasm = await WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject);
+			go.run(wasm.instance);
+		}
+		loadWasm();
+	</script>
+</head>
+
+<body>
+	<h1>Hello, WebAssembly with Go!</h1>
+</body>
+
+</html>
