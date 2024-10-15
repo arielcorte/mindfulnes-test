@@ -12,10 +12,11 @@ type Percentage struct {
 }
 
 type Field struct {
-	Name        string
-	Questions   []int
-	Percentages []Percentage
-	Total       int
+	Name          string
+	Questions     []int
+	Percentages   []Percentage
+	LanguageTotal string
+	Total         int
 }
 
 type Mindfulness struct {
@@ -40,8 +41,15 @@ func (f *Field) calculateResult(results []int) error {
 	return nil
 }
 
-func (f *Field) calculatePercentage() {
+func (f *Field) calculatePercentage() error {
+	for i := len(f.Percentages) - 1; i > 0; i-- {
+		if f.Total >= f.Percentages[i].Value {
+			f.LanguageTotal = f.Percentages[i].Name
+			return nil
+		}
+	}
 
+	return errors.New("Something went wrong while calculating percentage")
 }
 
 func (m *Mindfulness) calculateTest() error {
@@ -50,11 +58,21 @@ func (m *Mindfulness) calculateTest() error {
 	}
 
 	for i := 0; i < len(m.Fields); i++ {
-		if err := m.Fields[i].calculateResult(m.InvertedResults); err != nil {
+		if err := m.Fields[i].Calculate(m.InvertedResults); err != nil {
 			return err
 		}
 	}
 
+	return nil
+}
+
+func (f *Field) Calculate(results []int) error {
+	if err := f.calculateResult(results); err != nil {
+		return err
+	}
+	if err := f.calculatePercentage(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -101,19 +119,11 @@ func NewMindfulness(config *ConfigMindfulness) Mindfulness {
 		{Name: "Muy alto", Value: 33},
 	}
 
-	fields := make([]Field, len(config.Fields))
-
 	for i := 0; i < len(config.Fields); i++ {
 		f := &config.Fields[i]
-		fields[i] = Field{
-			Name:      f.Name,
-			Questions: f.Questions,
-		}
 
-		if len(f.Percentages) != 0 {
-			fields[i].Percentages = f.Percentages
-		} else {
-			fields[i].Percentages = DefaultPercentages
+		if len(f.Percentages) == 0 {
+			f.Percentages = DefaultPercentages
 		}
 	}
 
@@ -138,7 +148,7 @@ func FormatMindfulness(m *Mindfulness) string {
 
 	for i := 0; i < len(m.Fields); i++ {
 		f := &m.Fields[i]
-		formatted += fmt.Sprintf("%s: %s (%d)\n", f.Name, "", f.Total)
+		formatted += fmt.Sprintf("%s: %s (%d)\n", f.Name, f.LanguageTotal, f.Total)
 	}
 
 	return formatted
