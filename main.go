@@ -49,8 +49,8 @@ func (m *Mindfulness) calculateTest() error {
 		return errors.New("Not calculated inverted results")
 	}
 
-	for _, f := range m.Fields {
-		if err := f.calculateResult(m.InvertedResults); err != nil {
+	for i := 0; i < len(m.Fields); i++ {
+		if err := m.Fields[i].calculateResult(m.InvertedResults); err != nil {
 			return err
 		}
 	}
@@ -103,7 +103,8 @@ func NewMindfulness(config *ConfigMindfulness) Mindfulness {
 
 	fields := make([]Field, len(config.Fields))
 
-	for i, f := range config.Fields {
+	for i := 0; i < len(config.Fields); i++ {
+		f := &config.Fields[i]
 		fields[i] = Field{
 			Name:      f.Name,
 			Questions: f.Questions,
@@ -135,7 +136,8 @@ func FormatMindfulness(m *Mindfulness) string {
 
 	formatted := ""
 
-	for _, f := range m.Fields {
+	for i := 0; i < len(m.Fields); i++ {
+		f := &m.Fields[i]
 		formatted += fmt.Sprintf("%s: %s (%d)\n", f.Name, "", f.Total)
 	}
 
