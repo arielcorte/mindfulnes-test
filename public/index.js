@@ -5,10 +5,16 @@ const Percentage = class {
 
 const Field = class {
   name;
-  questions;
-  percentages;
+  questions = [];
+  percentages = [];
   languageTotal;
   total;
+
+  constructor({ name, questions, percentages }) {
+    this.name = name;
+    this.questions = questions;
+    this.percentages = percentages;
+  }
 
   /**
    * Calculates field result
@@ -16,7 +22,7 @@ const Field = class {
    */
   calculateResult(results) {
     let total = 0;
-    for (let i = 0; i < this.questions.length(); i++) {
+    for (let i = 0; i < this.questions.length; i++) {
       const q = this.questions[i];
       if (q == 0) {
         throw new Error("Invalid qustion number");
@@ -31,9 +37,10 @@ const Field = class {
    * Calculates field percentage
    */
   calculatePercentage() {
-    for (let i = this.percentages.lenght - 1; i > 0; i--) {
+    for (let i = this.percentages.length - 1; i > 0; i--) {
       if (this.total >= this.percentages[i].value) {
         this.languageTotal = this.percentages[i].name;
+        return;
       }
     }
 
@@ -44,7 +51,7 @@ const Field = class {
    * Calculates field result
    * @param {string[]} results - The test results
    */
-  Calculate(results) {
+  calculate(results) {
     try {
       this.calculateResult(results);
       this.calculatePercentage();
@@ -55,9 +62,9 @@ const Field = class {
 };
 
 const Mindfulness = class {
-  results;
-  invert;
-  invertedResults;
+  results = [];
+  invert = [];
+  invertedResults = [];
   fields;
   outOf;
 
@@ -68,7 +75,6 @@ const Mindfulness = class {
    * @returns
    */
   constructor(config) {
-    console.log("initializing");
     const DefaultPercentages = [
       { name: "Muy bajo" },
       { name: "Bajo", value: 15 },
@@ -80,24 +86,20 @@ const Mindfulness = class {
     for (let i = 0; i < config.fields.length; i++) {
       const f = config.fields[i];
 
-      if (f.percentages.length == 0) {
+      if (!f.percentages || f.percentages.length == 0) {
         f.percentages = DefaultPercentages;
       }
     }
 
-    let m = {
-      results: config.results,
-      invert: config.invert,
-      fields: config.fields,
-    };
+    this.results = config.results;
+    this.invert = config.invert;
+    this.fields = config.fields;
 
     if (config.outOf != null) {
-      m.outOf = config.outOf;
+      this.outOf = config.outOf;
     } else {
-      m.outOf = 5;
+      this.outOf = 5;
     }
-
-    return m;
   }
 
   calculateTest() {
@@ -107,13 +109,11 @@ const Mindfulness = class {
 
     for (let i = 0; i < this.fields.length; i++) {
       try {
-        m.fields[i].Calculate(m.invertedResults);
+        this.fields[i].calculate(this.invertedResults);
       } catch (e) {
         throw e;
       }
     }
-
-    return nil;
   }
 
   invertResults() {
@@ -127,7 +127,8 @@ const Mindfulness = class {
       this.invertedResults[inv - 1] = this.outOf + 1 - this.results[inv - 1];
     }
   }
-  Calculate() {
+
+  calculate() {
     if (this.results.length == 0) {
       throw new Error("Not results given");
     }
@@ -152,7 +153,7 @@ function FormatMindfulness(m) {
 
   for (let i = 0; i < m.fields.length; i++) {
     const f = m.fields[i];
-    formatted += fmt.Sprintf("%s: %s (%d)\n", f.name, f.languageTotal, f.total);
+    formatted += `${f.name}: ${f.languageTotal} (${f.total})\n`;
   }
 
   return formatted;
@@ -168,23 +169,23 @@ function main() {
       4, 5, 8, 10, 12, 13, 14, 16, 17, 18, 22, 23, 25, 28, 30, 34, 35, 38, 39,
     ],
     fields: [
-      {
+      new Field({
         name: "Observar",
         questions: [1, 6, 11, 15, 20, 26, 31, 36],
-      },
-      {
+      }),
+      new Field({
         name: "Describir",
         questions: [2, 7, 12, 16, 22, 27, 32, 37],
-      },
-      {
+      }),
+      new Field({
         name: "Actuar con conciencia",
         questions: [5, 8, 13, 18, 23, 28, 34, 38],
-      },
-      {
+      }),
+      new Field({
         name: "No enjuiciar",
         questions: [3, 10, 14, 17, 25, 30, 35, 39],
-      },
-      {
+      }),
+      new Field({
         name: "No reaccionar",
         questions: [4, 9, 19, 21, 24, 29, 33],
         percentages: [
@@ -194,16 +195,16 @@ function main() {
           { name: "Alto", value: 22 },
           { name: "Muy alto", value: 28 },
         ],
-      },
+      }),
     ],
   };
 
   const mind = new Mindfulness(config);
   try {
-    mind.Calculate();
+    mind.calculate();
   } catch (e) {
     console.error("An error occured while calculating: ", e);
   }
 
-  console.log(FormatMindfulness(mind));
+  document.getElementById("result").innerText = FormatMindfulness(mind);
 }
