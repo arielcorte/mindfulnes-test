@@ -6,11 +6,23 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Document</title>
 	<script type="text/javascript" src="public/index.js"></script>
+	<script type="text/javascript" src="public/ui.js"></script>
 </head>
 
 <body>
 	<h1>Mindfulness test</h1>
-	<button onclick="main()">Calcular</button>
+	<label for="results">
+		Resultados
+	</label>
+	<input id="results" />
+	<label for="inverted">
+		Invertidas
+	</label>
+	<input id="inverted" />
+	<h2>Campos</h2>
+	<div id="fields-container"></div>
+	<button onclick="createField()">Agregar campo</button>
+	<button onclick="calculateBtn()">Calcular</button>
 	<p id="result"></p>
 </body>
 

@@ -37,14 +37,16 @@ const Field = class {
    * Calculates field percentage
    */
   calculatePercentage() {
+    console.log(this.percentages);
     for (let i = this.percentages.length - 1; i > 0; i--) {
+      console.log(this.total, this.percentages[i].value);
       if (this.total >= this.percentages[i].value) {
         this.languageTotal = this.percentages[i].name;
         return;
       }
     }
 
-    throw new Error("Something went wrong while calculating percentage");
+    this.languageTotal = this.percentages[0].name;
   }
 
   /**
@@ -159,46 +161,7 @@ function FormatMindfulness(m) {
   return formatted;
 }
 
-function main() {
-  const config = {
-    results: [
-      4, 2, 5, 2, 4, 4, 4, 5, 3, 4, 5, 5, 4, 3, 4, 5, 4, 4, 1, 4, 4, 1, 5, 5, 3,
-      5, 3, 3, 5, 1, 4, 3, 5, 3, 3, 4, 2, 3, 4,
-    ],
-    invert: [
-      4, 5, 8, 10, 12, 13, 14, 16, 17, 18, 22, 23, 25, 28, 30, 34, 35, 38, 39,
-    ],
-    fields: [
-      new Field({
-        name: "Observar",
-        questions: [1, 6, 11, 15, 20, 26, 31, 36],
-      }),
-      new Field({
-        name: "Describir",
-        questions: [2, 7, 12, 16, 22, 27, 32, 37],
-      }),
-      new Field({
-        name: "Actuar con conciencia",
-        questions: [5, 8, 13, 18, 23, 28, 34, 38],
-      }),
-      new Field({
-        name: "No enjuiciar",
-        questions: [3, 10, 14, 17, 25, 30, 35, 39],
-      }),
-      new Field({
-        name: "No reaccionar",
-        questions: [4, 9, 19, 21, 24, 29, 33],
-        percentages: [
-          { name: "Muy bajo" },
-          { name: "Bajo", value: 14 },
-          { name: "Moderado", value: 17 },
-          { name: "Alto", value: 22 },
-          { name: "Muy alto", value: 28 },
-        ],
-      }),
-    ],
-  };
-
+function main(config) {
   const mind = new Mindfulness(config);
   try {
     mind.calculate();
@@ -206,5 +169,5 @@ function main() {
     console.error("An error occured while calculating: ", e);
   }
 
-  document.getElementById("result").innerText = FormatMindfulness(mind);
+  return FormatMindfulness(mind);
 }
